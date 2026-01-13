@@ -92,15 +92,25 @@ class ChatDeepSeek(ChatOpenAI):
                     "(设置 -> 大模型厂家) 或设置 DEEPSEEK_API_KEY 环境变量。"
                 )
         
-        # 初始化父类
-        super().__init__(
-            model=model,
-            openai_api_key=api_key,
-            openai_api_base=base_url,
-            temperature=temperature,
-            max_tokens=max_tokens,
+        # 🧠 [自动适配] 针对DeepSeek推理模型(Reasoning Models)处理 max_tokens 参数
+        # deepseek-reasoner (R1) 使用 max_completion_tokens
+        openai_kwargs = {
+            "model": model,
+            "openai_api_key": api_key,
+            "openai_api_base": base_url,
+            "temperature": temperature,
             **kwargs
-        )
+        }
+        
+        is_reasoning_model = "reasoner" in model
+        if is_reasoning_model and max_tokens is not None:
+            logger.info(f"🧠 [DeepSeek] 检测到推理模型 {model}，将 max_tokens={max_tokens} 转换为 max_completion_tokens")
+            openai_kwargs["max_completion_tokens"] = max_tokens
+        else:
+            openai_kwargs["max_tokens"] = max_tokens
+
+        # 初始化父类
+        super().__init__(**openai_kwargs)
         
         self.model_name = model
         

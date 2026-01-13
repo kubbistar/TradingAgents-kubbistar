@@ -12,7 +12,7 @@ _IS_WINDOWS = platform.system() == "Windows"
 if _IS_WINDOWS:
     try:
         from concurrent_log_handler import ConcurrentRotatingFileHandler
-        _USE_CONCURRENT_HANDLER = True
+        _USE_CONCURRENT_HANDLER = False # Temporarily disabled to fix encoding crash
     except ImportError:
         _USE_CONCURRENT_HANDLER = False
         logging.warning("concurrent-log-handler 未安装，在 Windows 上可能遇到日志轮转问题")

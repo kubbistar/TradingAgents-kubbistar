@@ -338,12 +338,33 @@ GOOGLE_OPENAI_MODELS = {
         "recommended_for": ["快速任务", "日常对话", "简单分析"],
         "avg_response_time": 2.87
     },
+    # Gemini 3.0 系列
+    "gemini-3-pro-preview": {
+        "description": "Gemini 3.0 Pro Preview - 下一代旗舰模型预览版",
+        "context_length": 32768,
+        "supports_function_calling": True,
+        "recommended_for": ["前沿探索", "复杂逻辑", "多模态推理"],
+        "avg_response_time": 3.50
+    },
+    "gemini-3-flash-preview": {
+        "description": "Gemini 3.0 Flash Preview - 下一代快速模型预览版",
+        "context_length": 32768,
+        "supports_function_calling": True,
+        "recommended_for": ["快速响应", "实时应用"],
+        "avg_response_time": 2.00
+    },
     # 经典模型
     "gemini-pro": {
         "description": "Gemini Pro - 经典模型，稳定可靠",
         "context_length": 32768,
         "supports_function_calling": True,
         "recommended_for": ["通用任务", "稳定性要求高的场景"]
+    },
+    "gemini-pro-latest": {
+        "description": "Gemini Pro Latest - 最新稳定版",
+        "context_length": 32768,
+        "supports_function_calling": True,
+        "recommended_for": ["通用任务"]
     }
 }
 

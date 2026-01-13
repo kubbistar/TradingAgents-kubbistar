@@ -70,7 +70,6 @@ class OpenAICompatibleBase(ChatOpenAI):
         object.__setattr__(self, "_provider_name", provider_name)
         object.__setattr__(self, "_model_name_alias", model)
 
-        # 获取API密钥
         if api_key is None:
             # 导入 API Key 验证工具
             try:
@@ -116,10 +115,22 @@ class OpenAICompatibleBase(ChatOpenAI):
         openai_kwargs = {
             "model": model,  # 这会被映射到model_name字段
             "temperature": temperature,
-            "max_tokens": max_tokens,
             **kwargs
         }
         
+        # 🧠 [自动适配] 针对推理模型(Reasoning Models)处理 max_tokens 参数
+        # OpenAI o1/o3, DeepSeek R1 (reasoner) 等推理模型使用 max_completion_tokens
+        is_reasoning_model = False
+        reasoning_prefixes = ["o1", "o3", "deepseek-reasoner"]
+        if any(model.startswith(p) for p in reasoning_prefixes) or "reasoner" in model:
+            is_reasoning_model = True
+            
+        if is_reasoning_model and max_tokens is not None:
+            logger.info(f"🧠 [推理模型适配] 检测到推理模型 {model}，将 max_tokens={max_tokens} 转换为 max_completion_tokens")
+            openai_kwargs["max_completion_tokens"] = max_tokens
+        else:
+            openai_kwargs["max_tokens"] = max_tokens
+
         # 根据LangChain版本使用不同的参数名
         try:
             # 新版本LangChain
@@ -435,7 +446,8 @@ OPENAI_COMPATIBLE_PROVIDERS = {
         "api_key_env": "DEEPSEEK_API_KEY",
         "models": {
             "deepseek-chat": {"context_length": 32768, "supports_function_calling": True},
-            "deepseek-coder": {"context_length": 16384, "supports_function_calling": True}
+            "deepseek-coder": {"context_length": 16384, "supports_function_calling": True},
+            "deepseek-reasoner": {"context_length": 32768, "supports_function_calling": False}
         }
     },
     "dashscope": {
@@ -482,6 +494,9 @@ OPENAI_COMPATIBLE_PROVIDERS = {
             "gpt-4-turbo": {"context_length": 128000, "supports_function_calling": True},
             "gpt-4o": {"context_length": 128000, "supports_function_calling": True},
             "gpt-4o-mini": {"context_length": 128000, "supports_function_calling": True},
+            "gpt-5.2": {"context_length": 128000, "supports_function_calling": True},
+            "gpt-5.2-pro": {"context_length": 128000, "supports_function_calling": True},
+            "gpt-5.2-mini": {"context_length": 128000, "supports_function_calling": True},
             "claude-3-haiku": {"context_length": 200000, "supports_function_calling": True},
             "claude-3-sonnet": {"context_length": 200000, "supports_function_calling": True},
             "claude-3-opus": {"context_length": 200000, "supports_function_calling": True},
